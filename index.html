@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101318">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="My Workout">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>My Workout</title>
+<style>
+:root{color-scheme:dark;--bg:#101318;--panel:#1b2028;--panel2:#242b35;--text:#f4f6f8;--muted:#aab3bf;--accent:#a8e063;--line:#343d49;--danger:#ff7777}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 16px calc(24px + env(safe-area-inset-bottom));max-width:700px;margin-inline:auto}
+header{display:flex;align-items:center;justify-content:space-between;padding:18px 0 14px}h1{font-size:23px;margin:0;letter-spacing:-.5px}h2{font-size:18px;margin:0 0 12px}h3{font-size:16px;margin:0}button,input,select{font:inherit}button{border:0;border-radius:12px;padding:12px 14px;background:var(--accent);color:#17200e;font-weight:700;cursor:pointer}button.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}button.danger{background:#40272b;color:#ffb8b8}button.small{padding:8px 10px;font-size:13px}.tabs{display:flex;gap:8px;margin:8px 0 18px}.tabs button{flex:1}.tabs button.active{background:var(--accent);color:#17200e}.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px;margin:12px 0}.muted{color:var(--muted);font-size:13px}.exercise-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.exercise-name{font-size:17px;font-weight:750}.set-head,.set-row{display:grid;grid-template-columns:36px 1fr 1fr 38px;gap:8px;align-items:center}.set-head{color:var(--muted);font-size:12px;margin:15px 0 7px}.set-row{margin:7px 0}.set-row input,.field input,.field select{width:100%;min-width:0;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px 8px;text-align:center}.set-row .set-num{color:var(--muted);text-align:center}.set-row button{padding:8px 0;background:transparent;color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.actions button{flex:1}.timer{background:linear-gradient(145deg,#202a20,#1b2028);border:1px solid #3e5533}.time{font-size:48px;font-weight:800;letter-spacing:1px;text-align:center;font-variant-numeric:tabular-nums;margin:10px 0}.timer-controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.timer-controls button{min-width:76px}.field{display:grid;gap:6px;margin:10px 0}.field label{font-size:13px;color:var(--muted)}.field input,.field select{text-align:left}.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}.hidden{display:none!important}.history-item{border-bottom:1px solid var(--line);padding:12px 0}.history-item:last-child{border:0}.empty{text-align:center;color:var(--muted);padding:24px 8px}.pill{display:inline-block;background:var(--panel2);border-radius:99px;padding:5px 9px;font-size:12px;color:var(--muted)}.notice{background:#2a3023;border:1px solid #475536;color:#d8edbf;border-radius:12px;padding:11px;font-size:13px;line-height:1.4}.topline{display:flex;align-items:center;justify-content:space-between;gap:8px}
+</style>
+</head>
+<body>
+<header><div><h1>MY WORKOUT</h1><div class="muted">La tua scheda, i tuoi progressi</div></div><span class="pill" id="today"></span></header>
+<nav class="tabs"><button id="tabTrain" class="active" onclick="showTab('train')">Allenamento</button><button id="tabHistory" class="secondary" onclick="showTab('history')">Storico</button><button id="tabEdit" class="secondary" onclick="showTab('edit')">Modifica scheda</button></nav>
+
+<main id="trainView">
+  <div class="topline"><div><h2>La mia scheda</h2><div class="muted">Registra peso e ripetizioni per ogni serie.</div></div><button class="small secondary" onclick="startWorkout()">Nuovo allenamento</button></div>
+  <div id="exerciseList"></div>
+  <section class="card timer">
+    <div class="topline"><h2>Timer recupero</h2><span class="pill" id="timerLabel">Pronto</span></div>
+    <div class="row">
+      <div class="field"><label for="timerMinutes">Minuti</label><input id="timerMinutes" type="number" min="0" max="30" value="1"></div>
+      <div class="field"><label for="timerSeconds">Secondi</label><input id="timerSeconds" type="number" min="0" max="59" value="30"></div>
+    </div>
+    <div class="time" id="timerDisplay">01:30</div>
+    <div class="timer-controls">
+      <button onclick="startTimer()">▶ Avvia</button><button class="secondary" onclick="pauseTimer()">Pausa</button><button class="secondary" onclick="resetTimer()">Reset</button>
+      <button class="secondary small" onclick="adjustTimer(-15)">−15s</button><button class="secondary small" onclick="adjustTimer(15)">+15s</button>
+    </div>
+    <p class="muted" style="text-align:center;margin-bottom:0">Puoi avviare il timer dopo ogni serie. Se blocchi lo schermo, iOS potrebbe sospendere il conto alla rovescia o l'avviso sonoro.</p>
+  </section>
+  <div class="actions"><button onclick="finishWorkout()">Termina e salva allenamento</button></div>
+</main>
+
+<main id="historyView" class="hidden">
+  <h2>Storico allenamenti</h2><div id="historyList"></div>
+  <div class="actions"><button class="secondary" onclick="exportData()">Esporta backup JSON</button><button class="secondary" onclick="document.getElementById('importFile').click()">Importa backup</button><input id="importFile" type="file" accept="application/json" class="hidden" onchange="importData(event)"></div>
+</main>
+
+<main id="editView" class="hidden">
+  <h2>Modifica la tua scheda</h2>
+  <div class="notice">Inserisci gli esercizi e il numero di serie. Puoi modificare la scheda in qualsiasi momento: lo storico degli allenamenti già salvati non verrà cancellato.</div>
+  <div id="editList"></div>
+  <section class="card">
+    <h3>Aggiungi esercizio</h3>
+    <div class="field"><label for="newName">Nome esercizio</label><input id="newName" placeholder="Es. Military press multipower"></div>
+    <div class="row"><div class="field"><label for="newSets">Numero serie</label><input id="newSets" type="number" min="1" max="12" value="3"></div><div class="field"><label for="newRest">Recupero predefinito (secondi)</label><input id="newRest" type="number" min="0" max="900" value="90"></div></div>
+    <button onclick="addExercise()">+ Aggiungi esercizio</button>
+  </section>
+</main>
+<script>
+const defaultExercises = [
+ {id:crypto.randomUUID(),name:"Spinte manubri su panca inclinata",sets:3,rest:120},
+ {id:crypto.randomUUID(),name:"Alzate laterali",sets:3,rest:75},
+ {id:crypto.randomUUID(),name:"Curl manubri",sets:3,rest:90}
+];
+let data = loadData();
+let current = {};
+let timerRemaining = 90, timerInterval = null, timerEnd = null, timerRunning = false;
+function loadData(){try{return JSON.parse(localStorage.getItem('myWorkoutData'))||{exercises:defaultExercises,history:[]}}catch{return {exercises:defaultExercises,history:[]}}}
+function saveData(){localStorage.setItem('myWorkoutData',JSON.stringify(data))}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function showTab(tab){
+ ['train','history','edit'].forEach(t=>{document.getElementById(t+'View').classList.toggle('hidden',t!==tab);document.getElementById('tab'+t[0].toUpperCase()+t.slice(1)).classList.toggle('active',t===tab);document.getElementById('tab'+t[0].toUpperCase()+t.slice(1)).classList.toggle('secondary',t!==tab)});
+ if(tab==='history')renderHistory();if(tab==='edit')renderEdit();
+}
+function getPreviousExercise(name){
+ const lastWorkout=data.history.find(w=>w.exercises?.some(ex=>ex.name.toLowerCase()===name.toLowerCase()));
+ return lastWorkout?.exercises?.find(ex=>ex.name.toLowerCase()===name.toLowerCase())||null;
+}
+function renderExercises(){
+ const el=document.getElementById('exerciseList');
+ if(!data.exercises.length){el.innerHTML='<div class="empty">Non hai ancora inserito esercizi. Vai su “Modifica scheda”.</div>';return}
+ el.innerHTML=data.exercises.map(ex=>{
+ const previous=getPreviousExercise(ex.name);
+ const rows=Array.from({length:ex.sets},(_,i)=>{const v=current[ex.id]?.[i]||{};const prev=previous?.sets?.[i];const prevText=prev && (prev.weight!=='' || prev.reps!=='') ? `Ultima volta: ${prev.weight!==''?prev.weight+' kg':'—'} × ${prev.reps!==''?prev.reps+' rep':'—'}` : 'Nessun dato precedente';return `<div class="set-row"><div class="set-num">${i+1}</div><input inputmode="decimal" type="number" min="0" step="0.5" placeholder="kg" aria-label="Peso serie ${i+1}" value="${v.weight??''}" onchange="updateSet('${ex.id}',${i},'weight',this.value)"><input inputmode="numeric" type="number" min="0" step="1" placeholder="rep" aria-label="Ripetizioni serie ${i+1}" value="${v.reps??''}" onchange="updateSet('${ex.id}',${i},'reps',this.value)"><button title="Avvia recupero" onclick="useExerciseRest(${ex.rest})">⏱</button></div><div class="muted" style="margin:-2px 0 7px 44px;font-size:11px">${prevText}</div>`}).join('');
+ return `<section class="card"><div class="exercise-head"><div><div class="exercise-name">${esc(ex.name)}</div><div class="muted">${ex.sets} serie · recupero ${ex.rest}s</div></div><button class="small secondary" onclick="useExerciseRest(${ex.rest})">Recupero</button></div><div class="set-head"><span>Serie</span><span>Peso (kg)</span><span>Ripetizioni</span><span></span></div>${rows}</section>`
+ }).join('');
+}
+function updateSet(id,i,key,val){current[id]??={};current[id][i]??={};current[id][i][key]=val===''?'':Number(val)}
+function useExerciseRest(sec){document.getElementById('timerMinutes').value=Math.floor(sec/60);document.getElementById('timerSeconds').value=sec%60;setTimerFromInputs();startTimer();document.querySelector('.timer').scrollIntoView({behavior:'smooth',block:'center'})}
+function startWorkout(){if(!confirm('Iniziare un nuovo allenamento? I dati non ancora salvati verranno azzerati.'))return;current={};renderExercises();showTab('train')}
+function finishWorkout(){
+ const entries=data.exercises.map(ex=>({name:ex.name,sets:Array.from({length:ex.sets},(_,i)=>current[ex.id]?.[i]||{}).map(s=>({weight:s.weight??'',reps:s.reps??''})),rest:ex.rest}));
+ if(!entries.length){alert('Aggiungi prima almeno un esercizio.');return}
+ const date=new Date().toISOString();data.history.unshift({id:crypto.randomUUID(),date,exercises:entries});saveData();current={};renderExercises();alert('Allenamento salvato nello storico.');showTab('history')
+}
+function renderEdit(){
+ document.getElementById('editList').innerHTML=data.exercises.map((ex,i)=>`<section class="card"><div class="field"><label>Nome esercizio</label><input value="${esc(ex.name)}" onchange="editExercise('${ex.id}','name',this.value)"></div><div class="row"><div class="field"><label>Serie</label><input type="number" min="1" max="12" value="${ex.sets}" onchange="editExercise('${ex.id}','sets',this.value)"></div><div class="field"><label>Recupero (secondi)</label><input type="number" min="0" max="900" value="${ex.rest}" onchange="editExercise('${ex.id}','rest',this.value)"></div></div><button class="danger small" onclick="deleteExercise('${ex.id}')">Elimina esercizio</button></section>`).join('')||'<div class="empty">Nessun esercizio presente.</div>';
+}
+function editExercise(id,key,val){const ex=data.exercises.find(x=>x.id===id);if(!ex)return;ex[key]=key==='name'?val:Math.max(key==='sets'?1:0,Number(val)||0);if(key==='sets')ex[key]=Math.min(12,ex[key]);saveData();renderExercises()}
+function addExercise(){const name=document.getElementById('newName').value.trim(),sets=Math.min(12,Math.max(1,Number(document.getElementById('newSets').value)||3)),rest=Math.min(900,Math.max(0,Number(document.getElementById('newRest').value)||0));if(!name){alert('Inserisci il nome dell’esercizio.');return}data.exercises.push({id:crypto.randomUUID(),name,sets,rest});saveData();document.getElementById('newName').value='';renderEdit();renderExercises()}
+function deleteExercise(id){if(!confirm('Eliminare questo esercizio dalla scheda? Lo storico resta invariato.'))return;data.exercises=data.exercises.filter(x=>x.id!==id);delete current[id];saveData();renderEdit();renderExercises()}
+function renderHistory(){const el=document.getElementById('historyList');if(!data.history.length){el.innerHTML='<div class="empty">Non hai ancora salvato allenamenti.</div>';return}el.innerHTML=data.history.map(w=>`<section class="card"><div class="topline"><h3>${new Date(w.date).toLocaleString('it-IT',{dateStyle:'medium',timeStyle:'short'})}</h3><button class="danger small" onclick="deleteWorkout('${w.id}')">Elimina</button></div>${w.exercises.map(ex=>`<div class="history-item"><strong>${esc(ex.name)}</strong><div class="muted">${ex.sets.map((s,i)=>`S${i+1}: ${s.weight!==''?s.weight+' kg':'—'} × ${s.reps!==''?s.reps+' rep':'—'}`).join(' · ')}</div></div>`).join('')}</section>`).join('')}
+function deleteWorkout(id){if(!confirm('Eliminare questo allenamento dallo storico?'))return;data.history=data.history.filter(w=>w.id!==id);saveData();renderHistory()}
+function exportData(){const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='my-workout-backup.json';a.click();URL.revokeObjectURL(a.href)}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.exercises)||!Array.isArray(d.history))throw Error();if(!confirm('Importare il backup? I dati attuali saranno sostituiti.'))return;data=d;saveData();renderExercises();renderHistory();renderEdit();alert('Backup importato.')}catch{alert('File non valido.')} };r.readAsText(f);e.target.value=''}
+function setTimerFromInputs(){timerRemaining=Math.max(0,Number(document.getElementById('timerMinutes').value||0)*60+Number(document.getElementById('timerSeconds').value||0));updateTimerDisplay()}
+function updateTimerDisplay(){const m=Math.floor(timerRemaining/60),s=timerRemaining%60;document.getElementById('timerDisplay').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
+function tick(){timerRemaining=Math.max(0,Math.ceil((timerEnd-Date.now())/1000));updateTimerDisplay();if(timerRemaining<=0){clearInterval(timerInterval);timerInterval=null;timerRunning=false;document.getElementById('timerLabel').textContent='Terminato';try{if(navigator.vibrate)navigator.vibrate([250,100,250]);}catch{};document.title='Recupero terminato · My Workout';}}
+function startTimer(){if(timerRunning)return;if(timerRemaining<=0)setTimerFromInputs();if(timerRemaining<=0)return;timerEnd=Date.now()+timerRemaining*1000;timerRunning=true;document.getElementById('timerLabel').textContent='In corso';document.title='Timer · My Workout';timerInterval=setInterval(tick,250)}
+function pauseTimer(){if(!timerRunning)return;clearInterval(timerInterval);timerInterval=null;timerRunning=false;timerRemaining=Math.max(0,Math.ceil((timerEnd-Date.now())/1000));document.getElementById('timerLabel').textContent='In pausa';updateTimerDisplay()}
+function resetTimer(){clearInterval(timerInterval);timerInterval=null;timerRunning=false;setTimerFromInputs();document.getElementById('timerLabel').textContent='Pronto';document.title='My Workout'}
+function adjustTimer(delta){pauseTimer();timerRemaining=Math.max(0,timerRemaining+delta);updateTimerDisplay();document.getElementById('timerMinutes').value=Math.floor(timerRemaining/60);document.getElementById('timerSeconds').value=timerRemaining%60}
+document.getElementById('timerMinutes').addEventListener('change',()=>{if(!timerRunning)setTimerFromInputs()});document.getElementById('timerSeconds').addEventListener('change',()=>{if(!timerRunning)setTimerFromInputs()});
+document.getElementById('today').textContent=new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'short'});
+renderExercises();renderHistory();renderEdit();
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body></html>
